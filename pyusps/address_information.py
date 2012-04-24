@@ -37,6 +37,8 @@ def _parse_response(res):
             result[name] = child.text
         results.append(result)
 
+    if len(results) == 1:
+        results = results.pop()
     return results
 
 def _get_response(xml):
@@ -56,11 +58,11 @@ def _get_response(xml):
 
 def _create_xml(
     user_id,
-    addresses,
+    *args
     ):
     root = etree.Element('AddressValidateRequest', USERID=user_id)
 
-    if len(addresses) > address_max:
+    if len(args) > address_max:
         # Raise here. The Verify API will not return an error. It will
         # just return the first 5 results
         raise ValueError(
@@ -70,14 +72,14 @@ def _create_xml(
                 )
             )
 
-    for i,_address in enumerate(addresses):
-        address = _address['address']
-        city = _address['city']
-        state= _address['state']
-        zip_code = _address.get('zip_code', None)
-        address_extended = _address.get('address_extended', None)
-        firm_name = _address.get('firm_name', None)
-        urbanization = _address.get('urbanization', None)
+    for i,arg in enumerate(args):
+        address = arg['address']
+        city = arg['city']
+        state= arg['state']
+        zip_code = arg.get('zip_code', None)
+        address_extended = arg.get('address_extended', None)
+        firm_name = arg.get('firm_name', None)
+        urbanization = arg.get('urbanization', None)
 
         address_el = etree.Element('Address', ID=str(i))
         root.append(address_el)
@@ -132,8 +134,8 @@ def _create_xml(
 
     return root
 
-def verify(user_id, addresses):
-    xml = _create_xml(user_id, addresses)
+def verify(user_id, *args):
+    xml = _create_xml(user_id, *args)
     res = _get_response(xml)
     _raise_if_error(res)
     res = _parse_response(res)
