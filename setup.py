@@ -1,0 +1,33 @@
+#!/usr/bin/python
+from setuptools import setup, find_packages
+
+EXTRAS_REQUIRES = dict(
+    test=[
+        'fudge>=1.0.3',
+        'nose>=1.1.2',
+        ],
+    )
+
+for k,v in EXTRAS_REQUIRES.iteritems():
+    if k == 'test':
+        continue
+    EXTRAS_REQUIRES['test'] += v
+
+setup(
+    name='pyusps',
+    version='0.0.1',
+    description='pyusps -- Python bindings for the USPS Ecommerce APIs',
+    author='Andres Buritica',
+    author_email='andres@thelinuxkid.com',
+    maintainer='Andres Buritica',
+    maintainer_email='andres@thelinuxkid.com',
+    url='https://github.com/andresburitica/pyusps',
+    packages = find_packages(),
+    namespace_packages = ['pyusps'],
+    test_suite='nose.collector',
+    install_requires=[
+        'setuptools>=0.6c11',
+        'lxml>=2.3.3',
+        ],
+    extras_require=EXTRAS_REQUIRES,
+    )
