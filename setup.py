@@ -2,9 +2,14 @@
 from setuptools import setup, find_packages
 
 EXTRAS_REQUIRES = dict(
+    # Using tests_require to specify test dependencies fails.
+    # https://groups.google.com/forum/#!topic/nose-users/fnJ-kAUbYHQ
     test=[
         'fudge>=1.0.3',
         'nose>=1.1.2',
+        ],
+    dev=[
+        'ipython>=0.12.1',
         ],
     )
 
