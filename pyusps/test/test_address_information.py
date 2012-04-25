@@ -5,7 +5,7 @@ from nose.tools import eq_ as eq
 from cStringIO import StringIO
 
 from pyusps.address_information import verify
-from pyusps.test.util import assert_raises
+from pyusps.test.util import assert_raises, assert_errors_equal
 
 @fudge.patch('urllib2.urlopen')
 def test_verify_simple(fake_urlopen):
@@ -334,7 +334,7 @@ def test_verify_more_than_5(fake_urlopen):
     eq(str(msg), 'Only 5 addresses are allowed per request')
 
 @fudge.patch('urllib2.urlopen')
-def test_verify_api_error(fake_urlopen):
+def test_verify_api_root_error(fake_urlopen):
     fake_urlopen = fake_urlopen.expects_call()
     req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
     fake_urlopen = fake_urlopen.with_args(req)
@@ -361,3 +361,70 @@ def test_verify_api_error(fake_urlopen):
                 'and/or password is incorrect.'
                 )
     eq(str(msg), expected)
+
+@fudge.patch('urllib2.urlopen')
+def test_verify_api_address_error_single(fake_urlopen):
+    fake_urlopen = fake_urlopen.expects_call()
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3ENJ%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    fake_urlopen = fake_urlopen.with_args(req)
+    res = StringIO("""<?xml version="1.0"?>
+<AddressValidateResponse><Address ID="0"><Error><Number>-2147219401</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Address Not Found.</Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>""")
+    fake_urlopen.returns(res)
+
+    address = OrderedDict([
+            ('address', '6406 Ivy Lane'),
+            ('city', 'Greenbelt'),
+            ('state', 'NJ'),
+            ])
+    msg = assert_raises(
+        ValueError,
+        verify,
+        'foo_id',
+        address
+        )
+
+    expected = '-2147219401: Address Not Found.'
+    eq(str(msg), expected)
+
+@fudge.patch('urllib2.urlopen')
+def test_verify_api_address_error_multiple(fake_urlopen):
+    fake_urlopen = fake_urlopen.expects_call()
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3CAddress+ID%3D%221%22%3E%3CAddress1%2F%3E%3CAddress2%3E8+Wildwood+Drive%3C%2FAddress2%3E%3CCity%3EOld+Lyme%3C%2FCity%3E%3CState%3ENJ%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    fake_urlopen = fake_urlopen.with_args(req)
+    res = StringIO("""<?xml version="1.0"?>
+<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="1"><Error><Number>-2147219400</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Invalid City.</Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>""")
+    fake_urlopen.returns(res)
+
+    addresses = [
+        OrderedDict([
+                ('address', '6406 Ivy Lane'),
+                ('city', 'Greenbelt'),
+                ('state', 'MD'),
+                ]),
+        OrderedDict([
+                ('address', '8 Wildwood Drive'),
+                ('city', 'Old Lyme'),
+                ('state', 'NJ'),
+                ]),
+        ]
+    res = verify(
+        'foo_id',
+        *addresses
+        )
+
+    # eq does not work with exceptions. Process each item manually.
+    eq(len(res), 2)
+    eq(
+        res[0],
+        OrderedDict([
+                ('address', '6406 IVY LN'),
+                ('city', 'GREENBELT'),
+                ('state', 'MD'),
+                ('zip5', '20770'),
+                ('zip4', '1441'),
+                ]),
+       )
+    assert_errors_equal(
+        res[1],
+        ValueError('-2147219400: Invalid City.'),
+        )

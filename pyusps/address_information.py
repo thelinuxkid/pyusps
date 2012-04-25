@@ -13,38 +13,73 @@ def _find_error(root):
         desc = root.find('Description')
         return (num, desc)
 
-def _raise_if_error(root):
-    error = _find_error(root)
-    if error is not None:
-        (num, desc) = error
-        raise ValueError(
-            '{num}: {desc}'.format(
-                num=num.text,
-                desc=desc.text,
-                )
+def _get_error(error):
+    (num, desc) = error
+    return ValueError(
+        '{num}: {desc}'.format(
+            num=num.text,
+            desc=desc.text,
             )
+        )
 
-def _parse_response(res):
+def _get_address_error(address):
+    error = address.find('Error')
+    if error is not None:
+        error = _find_error(error)
+        return _get_error(error)
+
+def _parse_address(address):
+    result = OrderedDict()
+    for child in address.iterchildren():
+        # elements are yielded in order
+        name = child.tag.lower()
+        # More user-friendly names for street
+        # attributes
+        if name == 'address2':
+            name = 'address'
+        elif name == 'address1':
+            name = 'address_extended'
+        elif name == 'firmname':
+            name = 'firm_name'
+        result[name] = child.text
+
+    return result
+
+def _process_one(address):
+    # Raise address error if there's only one item
+    error = _get_address_error(address)
+    if error is not None:
+        raise error
+
+    return _parse_address(address)
+
+def _process_multiple(addresses):
     results = []
-    for address in res.iterfind('Address'):
-        result = OrderedDict()
-        for child in address.iterchildren():
-            # elements are yielded in order
-            name = child.tag.lower()
-            # More user-friendly names for street
-            # attributes
-            if name == 'address2':
-                name = 'address'
-            elif name == 'address1':
-                name = 'address_extended'
-            elif name == 'firmname':
-                name = 'firm_name'
-            result[name] = child.text
+    for address in addresses:
+        # Return error object if there are
+        # multiple items
+        error = _get_address_error(address)
+        if error is not None:
+            result = error
+        else:
+            result = _parse_address(address)
         results.append(result)
 
-    if len(results) == 1:
-        results = results.pop()
     return results
+
+def _parse_response(res):
+    # General error, e.g., authorization
+    error = _find_error(res.getroot())
+    if error is not None:
+        raise _get_error(error)
+
+    results = res.findall('Address')
+    length = len(results)
+    if length == 0:
+        return None
+    if length == 1:
+        return _process_one(results.pop())
+    return _process_multiple(results)
 
 def _get_response(xml):
     params = OrderedDict([
@@ -142,7 +177,6 @@ def _create_xml(
 def verify(user_id, *args):
     xml = _create_xml(user_id, *args)
     res = _get_response(xml)
-    _raise_if_error(res.getroot())
     res = _parse_response(res)
 
     return res
