@@ -428,3 +428,27 @@ def test_verify_api_address_error_multiple(fake_urlopen):
         res[1],
         ValueError('-2147219400: Invalid City.'),
         )
+
+@fudge.patch('urllib2.urlopen')
+def test_verify_api_empty_error(fake_urlopen):
+    fake_urlopen = fake_urlopen.expects_call()
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3ENJ%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    fake_urlopen = fake_urlopen.with_args(req)
+    res = StringIO("""<?xml version="1.0"?>
+<AddressValidateResponse></AddressValidateResponse>""")
+    fake_urlopen.returns(res)
+
+    address = OrderedDict([
+            ('address', '6406 Ivy Lane'),
+            ('city', 'Greenbelt'),
+            ('state', 'NJ'),
+            ])
+    msg = assert_raises(
+        TypeError,
+        verify,
+        'foo_id',
+        address
+        )
+
+    expected = 'Could not find any address or error information'
+    eq(str(msg), expected)

@@ -76,7 +76,9 @@ def _parse_response(res):
     results = res.findall('Address')
     length = len(results)
     if length == 0:
-        return None
+        raise TypeError(
+            'Could not find any address or error information'
+            )
     if length == 1:
         return _process_one(results.pop())
     return _process_multiple(results)
