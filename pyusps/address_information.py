@@ -7,11 +7,16 @@ from collections import OrderedDict
 api_url = 'http://production.shippingapis.com/ShippingAPI.dll'
 address_max = 5
 
-def _raise_if_error(res):
-    root = res.getroot()
+def _find_error(root):
     if root.tag == 'Error':
         num = root.find('Number')
         desc = root.find('Description')
+        return (num, desc)
+
+def _raise_if_error(root):
+    error = _find_error(root)
+    if error is not None:
+        (num, desc) = error
         raise ValueError(
             '{num}: {desc}'.format(
                 num=num.text,
@@ -137,7 +142,7 @@ def _create_xml(
 def verify(user_id, *args):
     xml = _create_xml(user_id, *args)
     res = _get_response(xml)
-    _raise_if_error(res)
+    _raise_if_error(res.getroot())
     res = _parse_response(res)
 
     return res
