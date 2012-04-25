@@ -452,3 +452,36 @@ def test_verify_api_empty_error(fake_urlopen):
 
     expected = 'Could not find any address or error information'
     eq(str(msg), expected)
+
+@fudge.patch('urllib2.urlopen')
+def test_verify_api_order_error(fake_urlopen):
+    fake_urlopen = fake_urlopen.expects_call()
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3CAddress+ID%3D%221%22%3E%3CAddress1%2F%3E%3CAddress2%3E8+Wildwood+Drive%3C%2FAddress2%3E%3CCity%3EOld+Lyme%3C%2FCity%3E%3CState%3ECT%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    fake_urlopen = fake_urlopen.with_args(req)
+    res = StringIO("""<?xml version="1.0"?>
+<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="2"><Address2>8 WILDWOOD DR</Address2><City>OLD LYME</City><State>CT</State><Zip5>06371</Zip5><Zip4>1844</Zip4></Address></AddressValidateResponse>""")
+    fake_urlopen.returns(res)
+
+    addresses = [
+        OrderedDict([
+                ('address', '6406 Ivy Lane'),
+                ('city', 'Greenbelt'),
+                ('state', 'MD'),
+                ]),
+        OrderedDict([
+                ('address', '8 Wildwood Drive'),
+                ('city', 'Old Lyme'),
+                ('state', 'CT'),
+                ]),
+        ]
+    msg = assert_raises(
+        IndexError,
+        verify,
+        'foo_id',
+        *addresses
+        )
+
+    expected = ('The addresses returned are not in the same order '
+                'they were requested'
+                )
+    eq(str(msg), expected)
