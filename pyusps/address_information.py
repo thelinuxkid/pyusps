@@ -75,7 +75,7 @@ def _create_xml(
     for i,arg in enumerate(args):
         address = arg['address']
         city = arg['city']
-        state= arg['state']
+        state = arg.get('state', None)
         zip_code = arg.get('zip_code', None)
         address_extended = arg.get('address_extended', None)
         firm_name = arg.get('firm_name', None)

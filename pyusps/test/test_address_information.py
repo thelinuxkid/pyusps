@@ -10,7 +10,7 @@ from pyusps.test.util import assert_raises
 @fudge.patch('urllib2.urlopen')
 def test_verify_simple(fake_urlopen):
     fake_urlopen = fake_urlopen.expects_call()
-    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
     fake_urlopen = fake_urlopen.with_args(req)
     res = StringIO("""<?xml version="1.0"?>
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
@@ -20,6 +20,7 @@ def test_verify_simple(fake_urlopen):
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
+            ('zip_code', '20770'),
             ])
     res = verify(
         'foo_id',
@@ -111,6 +112,62 @@ def test_verify_zip_dash(fake_urlopen):
     res = verify(
         'foo_id',
         address
+        )
+
+    expected = OrderedDict([
+            ('address', '6406 IVY LN'),
+            ('city', 'GREENBELT'),
+            ('state', 'MD'),
+            ('zip5', '20770'),
+            ('zip4', '1441'),
+            ])
+    eq(res, expected)
+
+@fudge.patch('urllib2.urlopen')
+def test_verify_zip_only(fake_urlopen):
+    fake_urlopen = fake_urlopen.expects_call()
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%2F%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    fake_urlopen = fake_urlopen.with_args(req)
+    res = StringIO("""<?xml version="1.0"?>
+<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
+    fake_urlopen.returns(res)
+
+    address = OrderedDict([
+            ('address', '6406 Ivy Lane'),
+            ('city', 'Greenbelt'),
+            ('zip_code', '20770'),
+            ])
+    res = verify(
+        'foo_id',
+        address,
+        )
+
+    expected = OrderedDict([
+            ('address', '6406 IVY LN'),
+            ('city', 'GREENBELT'),
+            ('state', 'MD'),
+            ('zip5', '20770'),
+            ('zip4', '1441'),
+            ])
+    eq(res, expected)
+
+@fudge.patch('urllib2.urlopen')
+def test_verify_state_only(fake_urlopen):
+    fake_urlopen = fake_urlopen.expects_call()
+    req = """http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
+    fake_urlopen = fake_urlopen.with_args(req)
+    res = StringIO("""<?xml version="1.0"?>
+<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
+    fake_urlopen.returns(res)
+
+    address = OrderedDict([
+            ('address', '6406 Ivy Lane'),
+            ('city', 'Greenbelt'),
+            ('state', 'MD'),
+            ])
+    res = verify(
+        'foo_id',
+        address,
         )
 
     expected = OrderedDict([
