@@ -55,13 +55,14 @@ and a variable length list of addresses to verify.
 Requests
 --------
 
-Each address is a dict containing the following required keys.
-Only one of state or zip_code is needed:
+Each address is a dict containing the following required keys:
 
      :address: The street address
      :city: The city
      :state: The state
      :zip_code: The zip code in one the following formats: xxxxx, xxxxx-xxxx, or xxxxxxxxx
+
+*Only one of state or zip_code is needed.*
 
 The following keys are optional:
 
@@ -92,18 +93,18 @@ Each address can optionally contain the following keys:
     :urbanization: For Puerto Rico addresses only
     :returntext: Additional information about the address, usually a warning, e.g., "The address you entered was found but more information is needed (such as an apartment, suite, or box number) to match to a specific address."
 
-**firm_name, address_extended and urbanization will return the value
-requested if the API does not find a match.**
+*firm_name, address_extended and urbanization will return the value
+requested if the API does not find a match.*
 
-For multiple addresses responses, the order in which the addresses
-were specified in the request is preserved.
+For multiple addresses, the order in which the addresses
+were specified in the request is preserved in the response.
 
 Errors
 ------
 
 A ValueError will be raised if there's a general error, e.g.,
 invalid user id, or if a single address request generates an error.
-Except for a general error, multiple address requests do not raise errors.
+Except for a general error, multiple addresses requests do not raise errors.
 Instead, if one of the addresses generates an error, the
 ValueError object is returned along with the rest of the results.
 
@@ -129,7 +130,7 @@ Single address request::
            ('zip4', '1441'),
            ])
 
-Mutiples addresses request::
+Mutiple addresses request::
 
        from pyusps import address_information
 
@@ -163,7 +164,7 @@ Mutiples addresses request::
                 ]),
         ]
 
-Mutiples addresses error::
+Mutiple addresses error::
 
        from pyusps import address_information
 
@@ -193,4 +194,4 @@ Mutiples addresses error::
 
 Reference
 ---------
-For more information on the Address Information API visit https://www.usps.com/webtools/htm/Address-Information-v3-1a.htm#_Toc131231385
+For more information on the Address Information API visit https://www.usps.com/webtools/htm/Address-Information-v3-1a.htm
