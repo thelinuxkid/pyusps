@@ -19,31 +19,30 @@ or easy_install::
 
     easy_install pyusps
 
-Testing
-=======
-
-Install using pip::
-
-    pip install pyusps[test]
-
-or easy_install::
-
-    easy_install pyusps[test]
-
-Then run the tests using nose::
-
-     nosetests
-
 Developing
 ==========
 
-Install using pip::
+After installing git, setuptools and virtualenv::
 
-    pip install pyusps[dev,test]
+      # Clone read-only copy or your own forked copy
+      git clone git@github.com:andresburitica/pyusps.git
+      cd pyusps
+      # I like to install the virtual environment in its own
+      # hidden repo but you don't have to
+      virtualenv --no-site-packages .virtual
+      # I leave the magic to Ruby developers (.virtual/bin/activate)
+      # but you don't have to agree with me
+      .virtual/bin/python setup.py develop
+      # Install development and testing dependecies. Pip doesn't seem
+      # to handle extras_require yet: https://github.com/pypa/pip/issues/7.
+      # So, use easy_install
+      # At this point, pyusps will already be in easy-install.pth.
+      # So easy_install will not attempt to download it
+      .virtual/bin/easy_install pyusps[dev,test]
 
-or easy_install::
+You can now run the tests::
 
-    easy_install pyusps[dev,test]
+     .virtual/bin/nosetests
 
 Address Information API
 =======================
