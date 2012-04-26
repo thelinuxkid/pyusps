@@ -11,9 +11,12 @@
 /.installed.cfg
 /develop-eggs
 /*.egg-info
+/*.egg
 /eggs
 /bin
+/include
+/lib
+/local
 /build
 /dist
-/setup
-/.setup
+/.virtual

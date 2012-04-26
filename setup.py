@@ -13,15 +13,12 @@ EXTRAS_REQUIRES = dict(
         ],
     )
 
-for k,v in EXTRAS_REQUIRES.iteritems():
-    if k == 'test':
-        continue
-    EXTRAS_REQUIRES['test'] += v
-
 setup(
     name='pyusps',
     version='0.0.1',
     description='pyusps -- Python bindings for the USPS Ecommerce APIs',
+    long_description='Python bindings for the USPS Ecommerce APIs',
+    license='GPL',
     author='Andres Buritica',
     author_email='andres@thelinuxkid.com',
     maintainer='Andres Buritica',
