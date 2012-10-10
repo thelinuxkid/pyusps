@@ -2,7 +2,10 @@ import urllib2
 import urllib
 
 from lxml import etree
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 api_url = 'http://production.shippingapis.com/ShippingAPI.dll'
 address_max = 5

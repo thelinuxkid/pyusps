@@ -30,6 +30,7 @@ setup(
     install_requires=[
         'setuptools>=0.6c11',
         'lxml>=2.3.3',
+        'ordereddict==1.1',
         ],
     extras_require=EXTRAS_REQUIRES,
     )
