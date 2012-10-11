@@ -19,6 +19,19 @@ or easy_install::
 
     easy_install pyusps
 
+Building
+========
+
+External dependencies
+---------------------
+
+    - libxml2-dev
+    - libxslt1-dev
+    - build-essential
+    - python-dev
+    - python-setuptools
+    - python-virtualenv
+
 Developing
 ==========
 
