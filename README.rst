@@ -19,41 +19,6 @@ or easy_install::
 
     easy_install pyusps
 
-Building
-========
-
-External dependencies
----------------------
-
-    - libxml2-dev
-    - libxslt1-dev
-    - build-essential
-    - python-dev
-    - python-setuptools
-    - python-virtualenv
-
-Developing
-==========
-
-After installing git, setuptools and virtualenv::
-
-      # I like to install the virtual environment in its own
-      # hidden repo but you don't have to
-      virtualenv --no-site-packages .virtual
-      # I leave the magic to Ruby developers (.virtual/bin/activate)
-      # but you don't have to agree with me
-      .virtual/bin/python setup.py develop
-      # Install development and testing dependecies. Pip doesn't seem
-      # to handle extras_require yet: https://github.com/pypa/pip/issues/7.
-      # So, use easy_install
-      # At this point, pyusps will already be in easy-install.pth.
-      # So easy_install will not attempt to download it
-      .virtual/bin/easy_install pyusps[dev,test]
-
-You can now run the tests::
-
-     .virtual/bin/nosetests
-
 Address Information API
 =======================
 
@@ -204,3 +169,38 @@ Mutiple addresses error::
 Reference
 ---------
 For more information on the Address Information API visit https://www.usps.com/webtools/htm/Address-Information-v3-1a.htm
+
+Building
+========
+
+External dependencies
+---------------------
+
+    - libxml2-dev
+    - libxslt1-dev
+    - build-essential
+    - python-dev
+    - python-setuptools
+    - python-virtualenv
+
+Developing
+==========
+
+Go to the root directory of the project and run::
+
+      # I like to install the virtual environment in its own
+      # hidden repo but you don't have to
+      virtualenv --no-site-packages .virtual
+      # I leave the magic to Ruby developers (.virtual/bin/activate)
+      # but you don't have to agree with me
+      .virtual/bin/python setup.py develop
+      # Install development and testing dependecies. Pip doesn't seem
+      # to handle extras_require yet: https://github.com/pypa/pip/issues/7.
+      # So, use easy_install
+      # At this point, pyusps will already be in easy-install.pth.
+      # So easy_install will not attempt to download it
+      .virtual/bin/easy_install pyusps[dev,test]
+
+You can now run the tests::
+
+     .virtual/bin/nosetests
