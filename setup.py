@@ -2,8 +2,6 @@
 from setuptools import setup, find_packages
 
 EXTRAS_REQUIRES = dict(
-    # Using tests_require to specify test dependencies fails.
-    # https://groups.google.com/forum/#!topic/nose-users/fnJ-kAUbYHQ
     test=[
         'fudge>=1.0.3',
         'nose>=1.1.2',
@@ -13,11 +11,15 @@ EXTRAS_REQUIRES = dict(
         ],
     )
 
+# Pypi package documentation
+with open('README.rst') as fp:
+    long_description = fp.read()
+
 setup(
     name='pyusps',
     version='0.0.4',
     description='pyusps -- Python bindings for the USPS Ecommerce APIs',
-    long_description='Python bindings for the USPS Ecommerce APIs',
+    long_description=long_description,
     author='Andres Buritica',
     author_email='andres@thelinuxkid.com',
     maintainer='Andres Buritica',
