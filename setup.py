@@ -18,7 +18,6 @@ setup(
     version='0.0.3',
     description='pyusps -- Python bindings for the USPS Ecommerce APIs',
     long_description='Python bindings for the USPS Ecommerce APIs',
-    license='GPL',
     author='Andres Buritica',
     author_email='andres@thelinuxkid.com',
     maintainer='Andres Buritica',
