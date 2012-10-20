@@ -15,7 +15,7 @@ EXTRAS_REQUIRES = dict(
 
 setup(
     name='pyusps',
-    version='0.0.2',
+    version='0.0.3',
     description='pyusps -- Python bindings for the USPS Ecommerce APIs',
     long_description='Python bindings for the USPS Ecommerce APIs',
     license='GPL',
