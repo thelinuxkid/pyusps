@@ -33,4 +33,12 @@ setup(
         'ordereddict==1.1',
         ],
     extras_require=EXTRAS_REQUIRES,
-    )
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7'
+    ],
+)
