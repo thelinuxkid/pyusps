@@ -37,9 +37,6 @@ Developing
 
 After installing git, setuptools and virtualenv::
 
-      # Clone read-only copy or your own forked copy
-      git clone git@github.com:andresburitica/pyusps.git
-      cd pyusps
       # I like to install the virtual environment in its own
       # hidden repo but you don't have to
       virtualenv --no-site-packages .virtual

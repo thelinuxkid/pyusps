@@ -23,7 +23,7 @@ setup(
     author_email='andres@thelinuxkid.com',
     maintainer='Andres Buritica',
     maintainer_email='andres@thelinuxkid.com',
-    url='https://github.com/andresburitica/pyusps',
+    url='https://github.com/thelinuxkid/pyusps',
     packages = find_packages(),
     namespace_packages = ['pyusps'],
     test_suite='nose.collector',
