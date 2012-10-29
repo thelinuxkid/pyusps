@@ -190,23 +190,18 @@ To start developing run the following commands from the project's base
 directory. You can download the source from
 https://github.com/thelinuxkid/pyusps::
 
-    # I like to install the virtual environment in its own
-    # hidden repo but you don't have to
+    # I like to install the virtual environment in a hidden repo.
     virtualenv .virtual
     # I leave the magic to Ruby developers (.virtual/bin/activate)
-    # but you don't have to agree with me
     .virtual/bin/python setup.py develop
-    # Install the testing dependecies. Pip doesn't seem to handle
-    # extras_require yet: https://github.com/pypa/pip/issues/7.
-    # So, use easy_install.
     # At this point, pyusps will already be in easy-install.pth.
-    # So easy_install will not attempt to download it
-    .virtual/bin/easy_install pyusps[test]
+    # So, pip will not attempt to download it
+    .virtual/bin/pip install pyusps[test]
 
 If you like to use ipython you can install it with the dev
 requirement::
 
-    .virtual/bin/easy_install pyusps[dev]
+    .virtual/bin/pip install pyusps[dev]
 
 Testing
 -------
