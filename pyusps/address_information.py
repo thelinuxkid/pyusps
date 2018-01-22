@@ -1,11 +1,9 @@
-import urllib.request, urllib.error, urllib.parse
-import urllib.request, urllib.parse, urllib.error
+from collections import OrderedDict
 
 from lxml import etree
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
+
+import pyusps.urlutil
+
 
 api_url = 'http://production.shippingapis.com/ShippingAPI.dll'
 address_max = 5
@@ -100,10 +98,10 @@ def _get_response(xml):
             ])
     url = '{api_url}?{params}'.format(
         api_url=api_url,
-        params=urllib.parse.urlencode(params),
+        params=pyusps.urlutil.urlencode(params),
         )
 
-    res = urllib.request.urlopen(url)
+    res = pyusps.urlutil.urlopen(url)
     res = etree.parse(res)
 
     return res
