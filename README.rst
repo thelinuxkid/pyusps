@@ -181,27 +181,25 @@ External dependencies
     - build-essential
     - python-dev or python3-dev
     - python-setuptools or python3-setuptools
-    - python-virtualenv
+    - virtualenvwrapper
 
 Setup
 -----
 
-To start developing run the following commands from the project's base
+To start developing, run the following commands from the project's base
 directory. You can download the source from
 https://github.com/thelinuxkid/pyusps::
 
-    # I like to install the virtual environment in a hidden repo.
-    virtualenv .virtual
-    # I leave the magic to Ruby developers (.virtual/bin/activate)
-    .virtual/bin/python setup.py develop
+    mkvirtualenv pyusps
+    python setup.py develop
     # At this point, pyusps will already be in easy-install.pth.
     # So, pip will not attempt to download it
-    .virtual/bin/pip install pyusps[test]
+    pip install pyusps[test]
 
 If you like to use ipython you can install it with the dev
 requirement::
 
-    .virtual/bin/pip install pyusps[dev]
+    pip install pyusps[dev]
 
 Testing
 -------
@@ -209,4 +207,4 @@ Testing
 To run the unit-tests run the following command from the project's
 base directory::
 
-    .virtual/bin/nosetests
+    nosetests
