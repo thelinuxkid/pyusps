@@ -20,7 +20,7 @@ with open(path) as fp:
 
 setup(
     name='pyusps',
-    version='0.0.6',
+    version='0.0.7',
     description='pyusps -- Python bindings for the USPS Ecommerce APIs',
     long_description=long_description,
     author='Andres Buritica',
