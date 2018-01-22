@@ -168,7 +168,7 @@ Mutiple addresses error::
 
 Reference
 ---------
-For more information on the Address Information API visit https://www.usps.com/webtools/htm/Address-Information-v3-1a.htm
+For more information on the Address Information API visit https://www.usps.com/business/web-tools-apis/address-information-api.htm
 
 Developing
 ==========
