@@ -4,11 +4,11 @@ import os
 
 EXTRAS_REQUIRES = dict(
     test=[
-        'fudge>=1.0.3',
-        'nose>=1.1.2',
+        'fudge>=1.1.1',
+        'nose>=1.3.7',
         ],
     dev=[
-        'ipython>=0.12.1',
+        'ipython>=5.5.0',
         ],
     )
 
