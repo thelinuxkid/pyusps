@@ -13,5 +13,4 @@ def assert_raises(excClass, callableObj, *args, **kwargs):
 
 def assert_errors_equal(error_1, error_2):
     assert type(error_1) == type(error_2)
-    assert error_1.message, error_2.message
     assert error_1.args, error_2.args

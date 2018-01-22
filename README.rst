@@ -179,8 +179,8 @@ External dependencies
     - libxml2-dev
     - libxslt1-dev
     - build-essential
-    - python-dev
-    - python-setuptools
+    - python-dev or python3-dev
+    - python-setuptools or python3-setuptools
     - python-virtualenv
 
 Setup
