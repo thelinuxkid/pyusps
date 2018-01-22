@@ -2,7 +2,7 @@ import fudge
 
 from collections import OrderedDict
 from nose.tools import eq_ as eq
-from cStringIO import StringIO
+from io import StringIO
 
 from pyusps.address_information import verify
 from pyusps.test.util import assert_raises, assert_errors_equal
