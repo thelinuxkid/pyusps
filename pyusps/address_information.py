@@ -131,6 +131,11 @@ def _create_xml(
         firm_name = arg.get('firm_name', None)
         urbanization = arg.get('urbanization', None)
 
+        # Documentation refers to this as "Version" - it is an option to return all optional data as well
+        version_el = etree.Element('Revision')
+        version_el.text = '1'
+        root.append(version_el)        
+        
         address_el = etree.Element('Address', ID=str(i))
         root.append(address_el)
 
