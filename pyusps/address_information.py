@@ -5,7 +5,7 @@ from lxml import etree
 import pyusps.urlutil
 
 
-api_url = 'http://production.shippingapis.com/ShippingAPI.dll'
+api_url = 'https://production.shippingapis.com/ShippingAPI.dll'
 address_max = 5
 
 def _find_error(root):
