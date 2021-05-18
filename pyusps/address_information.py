@@ -122,6 +122,11 @@ def _create_xml(
                 )
             )
 
+    # Documentation refers to this as "Version" - it is an option to return all optional data as well
+    version_el = etree.Element('Revision')
+    version_el.text = '1'
+    root.append(version_el)   
+        
     for i,arg in enumerate(args):
         address = arg['address']
         city = arg['city']
@@ -130,7 +135,7 @@ def _create_xml(
         address_extended = arg.get('address_extended', None)
         firm_name = arg.get('firm_name', None)
         urbanization = arg.get('urbanization', None)
-
+             
         address_el = etree.Element('Address', ID=str(i))
         root.append(address_el)
 
