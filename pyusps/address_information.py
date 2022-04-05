@@ -3,7 +3,8 @@ from typing import Any, Iterable, Union
 
 from lxml import etree
 
-import pyusps.urlutil
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 ADDRESS_MAX = 5
 
@@ -92,9 +93,9 @@ def _parse_response(res) -> "list[Result]":
 
 def _get_response(xml):
     params = {'API': 'Verify', 'XML': etree.tostring(xml)}
-    param_string = pyusps.urlutil.urlencode(params)
+    param_string = urlencode(params)
     url = f'https://production.shippingapis.com/ShippingAPI.dll?{param_string}'
-    res = pyusps.urlutil.urlopen(url)
+    res = urlopen(url)
     res = etree.parse(res)
     return res
 
