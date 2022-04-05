@@ -56,8 +56,7 @@ def _process_one(address):
 
 def _process_multiple(addresses):
     results = []
-    count = 0
-    for address in addresses:
+    for i, address in enumerate(addresses):
         # Return error object if there are
         # multiple items
         error = _get_address_error(address)
@@ -65,13 +64,12 @@ def _process_multiple(addresses):
             result = error
         else:
             result = _parse_address(address)
-            if str(count) != address.get('ID'):
+            if str(i) != address.get('ID'):
                 msg = ('The addresses returned are not in the same '
                        'order they were requested'
                        )
                 raise IndexError(msg)
         results.append(result)
-        count += 1
 
     return results
 
