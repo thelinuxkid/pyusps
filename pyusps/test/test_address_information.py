@@ -276,6 +276,7 @@ def test_verify_urbanization(fake_urlopen):
     ]
     eq(res, expected)
 
+
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_multiple(fake_urlopen):
     fake_urlopen = fake_urlopen.expects_call()
@@ -284,8 +285,7 @@ def test_verify_multiple(fake_urlopen):
     res = StringIO(u"""<?xml version="1.0"?>
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="1"><Address2>8 WILDWOOD DR</Address2><City>OLD LYME</City><State>CT</State><Zip5>06371</Zip5><Zip4>1844</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
-
-    addresses = [
+    addresses_list = [
         {
             "address": "6406 Ivy Lane",
             "city": "Greenbelt",
@@ -297,25 +297,35 @@ def test_verify_multiple(fake_urlopen):
             "state": "CT",
         },
     ]
-    res = verify('foo_id', addresses)
+    addresses_generator = (a for a in addresses_list)
+    for inp in (addresses_list, addresses_generator):
+        res = verify('foo_id', inp)
 
-    expected = [
-        {
-            "address": "6406 IVY LN",
-            "city": "GREENBELT",
-            "state": "MD",
-            "zip5": "20770",
-            "zip4": "1441",
+        expected = [
+            {
+                "address": "6406 IVY LN",
+                "city": "GREENBELT",
+                "state": "MD",
+                "zip5": "20770",
+                "zip4": "1441",
+                },
+            {
+                "address": "8 WILDWOOD DR",
+                "city": "OLD LYME",
+                "state": "CT",
+                "zip5": "06371",
+                "zip4": "1844",
             },
-        {
-            "address": "8 WILDWOOD DR",
-            "city": "OLD LYME",
-            "state": "CT",
-            "zip5": "06371",
-            "zip4": "1844",
-        },
-    ]
-    eq(res, expected)
+        ]
+        eq(res, expected)
+
+
+def test_empty_input():
+    """We can handle empty input."""
+    result = verify("user_id", [])
+    expected = []
+    eq(result, expected)
+
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_more_than_5(fake_urlopen):

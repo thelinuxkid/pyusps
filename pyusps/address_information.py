@@ -97,18 +97,23 @@ def _get_response(xml):
     res = etree.parse(res)
     return res
 
-def _create_xml(
-    user_id,
-    addresses: Iterable,
-    ):
-    root = etree.Element('AddressValidateRequest', USERID=user_id)
-
-    for i, arg in enumerate(addresses):
+def _convert_input(input: Iterable[dict]) -> list[dict]:
+    result = []
+    for i, address in enumerate(input):
         if i >= ADDRESS_MAX:
             # Raise here. The Verify API will not return an error. It will
             # just return the first 5 results
             raise ValueError(f'Only {ADDRESS_MAX} addresses are allowed per request')
+        result.append(address)
+    return result
 
+def _create_xml(
+    user_id,
+    addresses: list[dict],
+    ):
+    root = etree.Element('AddressValidateRequest', USERID=user_id)
+
+    for i, arg in enumerate(addresses):
         address = arg['address']
         city = arg['city']
         state = arg.get('state', None)
@@ -170,7 +175,10 @@ def _create_xml(
 
     return root
 
-def verify(user_id: str, addresses: Iterable) -> "list[dict]":
+def verify(user_id: str, addresses: "Iterable[dict]") -> "list[dict]":
+    addresses = _convert_input(addresses)
+    if len(addresses) == 0:
+        return []
     xml = _create_xml(user_id, addresses)
     res = _get_response(xml)
     res = _parse_response(res)
