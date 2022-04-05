@@ -11,12 +11,7 @@ ADDRESS_MAX = 5
 def _get_error(node):
     if node.tag != 'Error':
         return None
-    return ValueError(
-        '{num}: {desc}'.format(
-            num=node.find('Number').text,
-            desc=node.find('Description').text,
-            )
-        )
+    return ValueError(f"{node.find('Number').text}: {node.find('Description').text}")
 
 def _get_address_error(address):
     error_node = address.find('Error')
@@ -78,13 +73,10 @@ def _get_response(xml):
             ('API', 'Verify'),
             ('XML', etree.tostring(xml)),
             ])
-    url = 'https://production.shippingapis.com/ShippingAPI.dll?{params}'.format(
-        params=pyusps.urlutil.urlencode(params),
-        )
-
+    param_string = pyusps.urlutil.urlencode(params)
+    url = f'https://production.shippingapis.com/ShippingAPI.dll?{param_string}'
     res = pyusps.urlutil.urlopen(url)
     res = etree.parse(res)
-
     return res
 
 def _create_xml(
@@ -97,12 +89,7 @@ def _create_xml(
         if i >= ADDRESS_MAX:
             # Raise here. The Verify API will not return an error. It will
             # just return the first 5 results
-            raise ValueError(
-                'Only {ADDRESS_MAX} addresses are allowed per '
-                'request'.format(
-                    ADDRESS_MAX=ADDRESS_MAX,
-                    )
-                )
+            raise ValueError(f'Only {ADDRESS_MAX} addresses are allowed per request')
 
         address = arg['address']
         city = arg['city']
