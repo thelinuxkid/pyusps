@@ -60,12 +60,12 @@ def _process_multiple(addresses):
         if error is not None:
             result = error
         else:
-            result = _parse_address(address)
             if str(i) != address.get('ID'):
                 msg = ('The addresses returned are not in the same '
                        'order they were requested'
                        )
                 raise IndexError(msg)
+            result = _parse_address(address)
         results.append(result)
 
     return results
