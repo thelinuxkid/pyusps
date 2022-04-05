@@ -30,8 +30,8 @@ class USPSError(ValueError):
 def _get_error(node):
     if node.tag != 'Error':
         return None
-    code = node.find('Number').text
-    description = node.find('Description').text
+    code = node.find('Number').text.strip()
+    description = node.find('Description').text.strip()
     return USPSError(code, description)
 
 def _get_address_error(address):

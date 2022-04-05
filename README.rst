@@ -117,12 +117,12 @@ Mutiple addresses, one of them isn't found so an error is returned::
             'zip4': '1435',
             'zip5': '20770'
         },
-        USPSError('-2147219400: Invalid City.  '),
+        USPSError('-2147219400: Invalid City.'),
     ]
     >>> results[1].code
     '-2147219400'
     >>> res[1].description
-    'Invalid City.  '
+    'Invalid City.'
 
 
 Reference
