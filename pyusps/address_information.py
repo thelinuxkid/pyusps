@@ -38,14 +38,14 @@ def _get_error(node):
     description = node.find('Description').text.strip()
     return USPSError(code, description)
 
-def _get_address_error(address):
+def _get_address_error(address: etree._Element) -> Union[USPSError, None]:
     error_node = address.find('Error')
     if error_node is None:
         return None
     else:
         return _get_error(error_node)
 
-def _parse_address(address) -> dict:
+def _parse_address(address: etree._Element) -> dict:
     result = {}
     # More user-friendly names for street
     # attributes
@@ -61,11 +61,12 @@ def _parse_address(address) -> dict:
         result[name] = child.text
     return result
 
-def _process_multiple(addresses) -> "list[Result]":
+def _process_multiple(addresses: "list[etree._Element]") -> "list[Result]":
     results = []
     for i, address in enumerate(addresses):
         # Return error object if there are
         # multiple items
+        result: Result
         error = _get_address_error(address)
         if error is not None:
             result = error
@@ -80,26 +81,26 @@ def _process_multiple(addresses) -> "list[Result]":
 
     return results
 
-def _parse_response(res) -> "list[Result]":
+def _parse_response(res: etree._ElementTree) -> "list[Result]":
     # General error, e.g., authorization
     error = _get_error(res.getroot())
     if error is not None:
         raise error
 
-    results = res.findall('Address')
-    if len(results) == 0:
+    elements = res.findall('Address')
+    if len(elements) == 0:
         raise RuntimeError('Could not find any address or error information')
-    return _process_multiple(results)
+    return _process_multiple(elements)
 
-def _get_response(xml):
+def _get_response(xml: etree._Element) -> etree._ElementTree:
     params = {'API': 'Verify', 'XML': etree.tostring(xml)}
     param_string = urlencode(params)
     url = f'https://production.shippingapis.com/ShippingAPI.dll?{param_string}'
     res = urlopen(url)
-    res = etree.parse(res)
-    return res
+    tree = etree.parse(res)
+    return tree
 
-def _convert_input(input: Iterable[Mapping]) -> list[Mapping]:
+def _convert_input(input: "Iterable[Mapping]") -> "list[Mapping]":
     result = []
     for i, address in enumerate(input):
         if i >= ADDRESS_MAX:
@@ -116,10 +117,7 @@ def _get(mapping: Mapping, key: str) -> Any:
     except KeyError:
         return None
 
-def _create_xml(
-    user_id: str,
-    addresses: "list[Mapping]",
-    ):
+def _create_xml(user_id: str, addresses: "list[Mapping]") -> etree._Element:
     root = etree.Element('AddressValidateRequest', USERID=user_id)
 
     for i, arg in enumerate(addresses):
@@ -188,8 +186,7 @@ def verify(user_id: str, addresses: "Iterable[Mapping]") -> "list[Union[dict, US
     addresses = _convert_input(addresses)
     if len(addresses) == 0:
         return []
-    xml = _create_xml(user_id, addresses)
-    res = _get_response(xml)
-    res = _parse_response(res)
-
+    xml_request = _create_xml(user_id, addresses)
+    xml_response = _get_response(xml_request)
+    res = _parse_response(xml_response)
     return res

@@ -28,3 +28,4 @@ the motivation of many of these changes.
 - The new `USPSError` includes the attributes `code: str` and `description: str`
   so you can get the original error without having to do string parsing.
 - Testing on GitHub Actions!
+- Type hints

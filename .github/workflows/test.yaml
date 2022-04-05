@@ -23,7 +23,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install dependencies and this library
         run: pip install -e .[test]
       - name: Run tests
         run: nosetests
+  lint:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9.6" # Latest python that still works with fudge
+      - name: Install dependencies and this library
+        run: pip install -e .[test]
+      - name: Run MyPy
+        run: mypy pyusps

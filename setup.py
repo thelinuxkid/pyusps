@@ -5,6 +5,8 @@ import os
 EXTRAS_REQUIRES = dict(
     test=[
         'fudge>=1.1.1',
+        'lxml_stubs>=0.4.0',
+        'mypy>=0.942',
         'nose>=1.3.7',
         ],
     dev=[

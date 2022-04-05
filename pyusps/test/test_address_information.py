@@ -1,3 +1,5 @@
+# type: ignore
+
 import fudge
 
 from nose.tools import eq_ as eq
