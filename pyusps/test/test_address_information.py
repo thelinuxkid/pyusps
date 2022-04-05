@@ -4,7 +4,7 @@ from collections import OrderedDict
 from nose.tools import eq_ as eq
 from io import StringIO
 
-from pyusps.address_information import verify
+from pyusps.address_information import verify, USPSError
 from pyusps.test.util import assert_raises, assert_errors_equal
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -292,14 +292,27 @@ def test_verify_more_than_5(fake_urlopen):
     ])
     addresses = [inp] * 6
 
-    msg = assert_raises(
+    err = assert_raises(
         ValueError,
         verify,
         'foo_id',
         addresses
         )
+    expected = ValueError('Only 5 addresses are allowed per request')
+    assert_errors_equal(err, expected)
 
-    eq(str(msg), 'Only 5 addresses are allowed per request')
+
+def test_error_properties():
+    """We can treat these pretty much like a ValueError."""
+    err = USPSError("code", "description")
+    err2 = USPSError("code", "description")
+    eq(err.code, "code")
+    eq(err.description, "description")
+    eq(err.args, ("code: description", ))
+    eq(str(err), "code: description")
+    assert isinstance(err, ValueError)
+    eq(err, err2)
+
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_api_root_error(fake_urlopen):
@@ -318,17 +331,18 @@ def test_verify_api_root_error(fake_urlopen):
             ('city', 'Greenbelt'),
             ('state', 'MD'),
             ])
-    msg = assert_raises(
-        ValueError,
+    err = assert_raises(
+        USPSError,
         verify,
         'foo_id',
         [address]
         )
 
-    expected = ('80040b1a: Authorization failure.  Perhaps username '
-                'and/or password is incorrect.'
-                )
-    eq(str(msg), expected)
+    expected = USPSError(
+        "80040b1a",
+        "Authorization failure.  Perhaps username and/or password is incorrect."
+    )
+    eq(err, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_api_address_error_single(fake_urlopen):
@@ -347,10 +361,8 @@ def test_verify_api_address_error_single(fake_urlopen):
     res = verify('foo_id', address)
 
     eq(len(res), 1)
-    assert_errors_equal(
-        res[0],
-        ValueError('-2147219401: Address Not Found.'),
-        )
+    expected = USPSError("-2147219401", "Address Not Found.")
+    eq(res[0], expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_api_address_error_multiple(fake_urlopen):
@@ -386,11 +398,9 @@ def test_verify_api_address_error_multiple(fake_urlopen):
                 ('zip5', '20770'),
                 ('zip4', '1441'),
                 ]),
-       )
-    assert_errors_equal(
-        res[1],
-        ValueError('-2147219400: Invalid City.'),
-        )
+    )
+    expected = USPSError("-2147219400", "Invalid City.")
+    eq(res[1], expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_api_empty_error(fake_urlopen):
@@ -406,15 +416,15 @@ def test_verify_api_empty_error(fake_urlopen):
             ('city', 'Greenbelt'),
             ('state', 'NJ'),
             ])]
-    msg = assert_raises(
+    err = assert_raises(
         TypeError,
         verify,
         'foo_id',
         address
         )
 
-    expected = 'Could not find any address or error information'
-    eq(str(msg), expected)
+    expected = TypeError('Could not find any address or error information')
+    assert_errors_equal(err, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_api_order_error(fake_urlopen):
@@ -437,14 +447,13 @@ def test_verify_api_order_error(fake_urlopen):
                 ('state', 'CT'),
                 ]),
         ]
-    msg = assert_raises(
+    err = assert_raises(
         IndexError,
         verify,
         'foo_id',
         addresses
         )
-
-    expected = ('The addresses returned are not in the same order '
-                'they were requested'
-                )
-    eq(str(msg), expected)
+    expected = IndexError(
+        'The addresses returned are not in the same order they were requested'
+    )
+    assert_errors_equal(err, expected)

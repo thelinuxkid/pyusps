@@ -7,11 +7,33 @@ import pyusps.urlutil
 
 ADDRESS_MAX = 5
 
+class USPSError(ValueError):
+    """
+    An error from the USPS API, such as a bad `user_id` or when an address is not found.
+
+    Inherits from ValueError. Also has attributes `code: str` and `description: str`.
+    """
+    code: str
+    description: str
+
+    def __init__(self, code: str, description: str) -> None:
+        self.code = code
+        self.description = description
+        super().__init__(f"{code}: {description}")
+
+    def __eq__(self, o: object) -> bool:
+        return (
+            isinstance(o, USPSError) and
+            self.code == o.code and
+            self.description == o.description
+        )
 
 def _get_error(node):
     if node.tag != 'Error':
         return None
-    return ValueError(f"{node.find('Number').text}: {node.find('Description').text}")
+    code = node.find('Number').text
+    description = node.find('Description').text
+    return USPSError(code, description)
 
 def _get_address_error(address):
     error_node = address.find('Error')
