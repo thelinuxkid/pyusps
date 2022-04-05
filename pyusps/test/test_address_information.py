@@ -6,14 +6,16 @@ from io import StringIO
 from pyusps.address_information import verify, USPSError
 from pyusps.test.util import assert_raises, assert_errors_equal
 
+def setup_urlopen_mock(mock, expects, return_str):
+    mock = mock.expects_call().with_args(expects)
+    mock = mock.returns(StringIO(return_str))
+    return mock
+
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_simple(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -38,12 +40,9 @@ def test_verify_simple(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_zip5(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -68,12 +67,9 @@ def test_verify_zip5(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_zip_both(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E1441%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -98,12 +94,9 @@ def test_verify_zip_both(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_zip_dash(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E1441%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -128,12 +121,9 @@ def test_verify_zip_dash(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_zip_only(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%2F%3E%3CZip5%3E20770%3C%2FZip5%3E%3CZip4%3E%3C%2FZip4%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -157,12 +147,9 @@ def test_verify_zip_only(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_state_only(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -186,12 +173,9 @@ def test_verify_state_only(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_firm_name(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CFirmName%3EXYZ+Corp%3C%2FFirmName%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><FirmName>XYZ CORP</FirmName><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><FirmName>XYZ CORP</FirmName><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -217,12 +201,9 @@ def test_verify_firm_name(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_address_extended(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%3ESuite+12%3C%2FAddress1%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address1>STE 12</Address1><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address1>STE 12</Address1><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -247,12 +228,9 @@ def test_verify_address_extended(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_urbanization(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CUrbanization%3EPuerto+Rico%3C%2FUrbanization%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Urbanization>PUERTO RICO</Urbanization><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Urbanization>PUERTO RICO</Urbanization><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -279,12 +257,10 @@ def test_verify_urbanization(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_multiple(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3CAddress+ID%3D%221%22%3E%3CAddress1%2F%3E%3CAddress2%3E8+Wildwood+Drive%3C%2FAddress2%3E%3CCity%3EOld+Lyme%3C%2FCity%3E%3CState%3ECT%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="1"><Address2>8 WILDWOOD DR</Address2><City>OLD LYME</City><State>CT</State><Zip5>06371</Zip5><Zip4>1844</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="1"><Address2>8 WILDWOOD DR</Address2><City>OLD LYME</City><State>CT</State><Zip5>06371</Zip5><Zip4>1844</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
+
     addresses_list = [
         {
             "address": "6406 Ivy Lane",
@@ -360,15 +336,13 @@ def test_error_properties():
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_api_root_error(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<Error>
+    res = u"""<Error>
         <Number>80040b1a</Number>
         <Description>Authorization failure.  Perhaps username and/or password is incorrect.</Description>
         <Source>UspsCom::DoAuth</Source>
-</Error>""")
-    fake_urlopen.returns(res)
+        </Error>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = {
         "address": "6406 Ivy Lane",
@@ -390,12 +364,9 @@ def test_verify_api_root_error(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_api_address_error_single(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3ENJ%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Error><Number>-2147219401</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Address Not Found.</Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Error><Number>-2147219401</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Address Not Found.</Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -412,12 +383,9 @@ def test_verify_api_address_error_single(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_api_address_error_multiple(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3CAddress+ID%3D%221%22%3E%3CAddress1%2F%3E%3CAddress2%3E8+Wildwood+Drive%3C%2FAddress2%3E%3CCity%3EOld+Lyme%3C%2FCity%3E%3CState%3ENJ%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="1"><Error><Number>-2147219400</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Invalid City.  </Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="1"><Error><Number>-2147219400</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Invalid City.  </Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     addresses = [
         {
@@ -450,12 +418,9 @@ def test_verify_api_address_error_multiple(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_api_empty_error(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3ENJ%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     address = [
         {
@@ -476,12 +441,9 @@ def test_verify_api_empty_error(fake_urlopen):
 
 @fudge.patch('pyusps.address_information.urlopen')
 def test_verify_api_order_error(fake_urlopen):
-    fake_urlopen = fake_urlopen.expects_call()
     req = """https://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=%3CAddressValidateRequest+USERID%3D%22foo_id%22%3E%3CAddress+ID%3D%220%22%3E%3CAddress1%2F%3E%3CAddress2%3E6406+Ivy+Lane%3C%2FAddress2%3E%3CCity%3EGreenbelt%3C%2FCity%3E%3CState%3EMD%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3CAddress+ID%3D%221%22%3E%3CAddress1%2F%3E%3CAddress2%3E8+Wildwood+Drive%3C%2FAddress2%3E%3CCity%3EOld+Lyme%3C%2FCity%3E%3CState%3ECT%3C%2FState%3E%3CZip5%2F%3E%3CZip4%2F%3E%3C%2FAddress%3E%3C%2FAddressValidateRequest%3E"""
-    fake_urlopen = fake_urlopen.with_args(req)
-    res = StringIO(u"""<?xml version="1.0"?>
-<AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="2"><Address2>8 WILDWOOD DR</Address2><City>OLD LYME</City><State>CT</State><Zip5>06371</Zip5><Zip4>1844</Zip4></Address></AddressValidateResponse>""")
-    fake_urlopen.returns(res)
+    res = u"""<?xml version="1.0"?><AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address><Address ID="2"><Address2>8 WILDWOOD DR</Address2><City>OLD LYME</City><State>CT</State><Zip5>06371</Zip5><Zip4>1844</Zip4></Address></AddressValidateResponse>"""
+    setup_urlopen_mock(fake_urlopen, req, res)
 
     addresses = [
         {
