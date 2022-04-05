@@ -274,25 +274,26 @@ def test_verify_multiple(fake_urlopen):
         },
     ]
     addresses_generator = (a for a in addresses_list)
+
+    expected = [
+        {
+            "address": "6406 IVY LN",
+            "city": "GREENBELT",
+            "state": "MD",
+            "zip5": "20770",
+            "zip4": "1441",
+            },
+        {
+            "address": "8 WILDWOOD DR",
+            "city": "OLD LYME",
+            "state": "CT",
+            "zip5": "06371",
+            "zip4": "1844",
+        },
+    ]
+
     for inp in (addresses_list, addresses_generator):
         res = verify('foo_id', inp)
-
-        expected = [
-            {
-                "address": "6406 IVY LN",
-                "city": "GREENBELT",
-                "state": "MD",
-                "zip5": "20770",
-                "zip4": "1441",
-                },
-            {
-                "address": "8 WILDWOOD DR",
-                "city": "OLD LYME",
-                "state": "CT",
-                "zip5": "06371",
-                "zip4": "1844",
-            },
-        ]
         eq(res, expected)
 
 
