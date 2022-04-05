@@ -16,24 +16,21 @@ def test_verify_simple(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
             ('zip_code', '20770'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -45,24 +42,21 @@ def test_verify_zip5(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
             ('zip_code', '20770'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -74,24 +68,21 @@ def test_verify_zip_both(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
             ('zip_code', '207701441'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -103,24 +94,21 @@ def test_verify_zip_dash(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
             ('zip_code', '20770-1441'),
-            ])
-    res = verify(
-        'foo_id',
-        address
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -132,23 +120,20 @@ def test_verify_zip_only(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('zip_code', '20770'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -160,23 +145,20 @@ def test_verify_state_only(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -188,25 +170,22 @@ def test_verify_firm_name(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><FirmName>XYZ CORP</FirmName><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('firm_name', 'XYZ Corp'),
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('firm_name', 'XYZ CORP'),
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -218,25 +197,22 @@ def test_verify_address_extended(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address1>STE 12</Address1><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('address_extended', 'Suite 12'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address_extended', 'STE 12'),
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -248,25 +224,22 @@ def test_verify_urbanization(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Address2>6406 IVY LN</Address2><City>GREENBELT</City><State>MD</State><Urbanization>PUERTO RICO</Urbanization><Zip5>20770</Zip5><Zip4>1441</Zip4></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('urbanization', 'Puerto Rico'),
             ('city', 'Greenbelt'),
             ('state', 'MD'),
-            ])
-    res = verify(
-        'foo_id',
-        address,
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = OrderedDict([
+    expected = [OrderedDict([
             ('address', '6406 IVY LN'),
             ('city', 'GREENBELT'),
             ('state', 'MD'),
             ('urbanization', 'PUERTO RICO'),
             ('zip5', '20770'),
             ('zip4', '1441'),
-            ])
+            ])]
     eq(res, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -290,10 +263,7 @@ def test_verify_multiple(fake_urlopen):
                 ('state', 'CT'),
                 ]),
         ]
-    res = verify(
-        'foo_id',
-        *addresses
-        )
+    res = verify('foo_id', addresses)
 
     expected = [
         OrderedDict([
@@ -315,20 +285,18 @@ def test_verify_multiple(fake_urlopen):
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_more_than_5(fake_urlopen):
-    addresses = [
-        OrderedDict(),
-        OrderedDict(),
-        OrderedDict(),
-        OrderedDict(),
-        OrderedDict(),
-        OrderedDict(),
-        ]
+    inp = OrderedDict([
+        ('address', '6406 Ivy Lane'),
+        ('city', 'Greenbelt'),
+        ('state', 'MD'),
+    ])
+    addresses = [inp] * 6
 
     msg = assert_raises(
         ValueError,
         verify,
         'foo_id',
-        *addresses
+        addresses
         )
 
     eq(str(msg), 'Only 5 addresses are allowed per request')
@@ -354,7 +322,7 @@ def test_verify_api_root_error(fake_urlopen):
         ValueError,
         verify,
         'foo_id',
-        address
+        [address]
         )
 
     expected = ('80040b1a: Authorization failure.  Perhaps username '
@@ -371,20 +339,18 @@ def test_verify_api_address_error_single(fake_urlopen):
 <AddressValidateResponse><Address ID="0"><Error><Number>-2147219401</Number><Source>API_AddressCleancAddressClean.CleanAddress2;SOLServer.CallAddressDll</Source><Description>Address Not Found.</Description><HelpFile></HelpFile><HelpContext>1000440</HelpContext></Error></Address></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'NJ'),
-            ])
-    msg = assert_raises(
-        ValueError,
-        verify,
-        'foo_id',
-        address
-        )
+            ])]
+    res = verify('foo_id', address)
 
-    expected = '-2147219401: Address Not Found.'
-    eq(str(msg), expected)
+    eq(len(res), 1)
+    assert_errors_equal(
+        res[0],
+        ValueError('-2147219401: Address Not Found.'),
+        )
 
 @fudge.patch('pyusps.urlutil.urlopen')
 def test_verify_api_address_error_multiple(fake_urlopen):
@@ -407,10 +373,7 @@ def test_verify_api_address_error_multiple(fake_urlopen):
                 ('state', 'NJ'),
                 ]),
         ]
-    res = verify(
-        'foo_id',
-        *addresses
-        )
+    res = verify('foo_id', addresses)
 
     # eq does not work with exceptions. Process each item manually.
     eq(len(res), 2)
@@ -438,11 +401,11 @@ def test_verify_api_empty_error(fake_urlopen):
 <AddressValidateResponse></AddressValidateResponse>""")
     fake_urlopen.returns(res)
 
-    address = OrderedDict([
+    address = [OrderedDict([
             ('address', '6406 Ivy Lane'),
             ('city', 'Greenbelt'),
             ('state', 'NJ'),
-            ])
+            ])]
     msg = assert_raises(
         TypeError,
         verify,
@@ -478,7 +441,7 @@ def test_verify_api_order_error(fake_urlopen):
         IndexError,
         verify,
         'foo_id',
-        *addresses
+        addresses
         )
 
     expected = ('The addresses returned are not in the same order '

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Iterable
 
 from lxml import etree
 
@@ -6,7 +7,7 @@ import pyusps.urlutil
 
 
 api_url = 'https://production.shippingapis.com/ShippingAPI.dll'
-address_max = 5
+ADDRESS_MAX = 5
 
 
 def _get_error(node):
@@ -43,14 +44,6 @@ def _parse_address(address):
 
     return result
 
-def _process_one(address):
-    # Raise address error if there's only one item
-    error = _get_address_error(address)
-    if error is not None:
-        raise error
-
-    return _parse_address(address)
-
 def _process_multiple(addresses):
     results = []
     for i, address in enumerate(addresses):
@@ -77,13 +70,10 @@ def _parse_response(res):
         raise error
 
     results = res.findall('Address')
-    length = len(results)
-    if length == 0:
+    if len(results) == 0:
         raise TypeError(
             'Could not find any address or error information'
             )
-    if length == 1:
-        return _process_one(results.pop())
     return _process_multiple(results)
 
 def _get_response(xml):
@@ -103,21 +93,21 @@ def _get_response(xml):
 
 def _create_xml(
     user_id,
-    *args
+    addresses: Iterable,
     ):
     root = etree.Element('AddressValidateRequest', USERID=user_id)
 
-    if len(args) > address_max:
-        # Raise here. The Verify API will not return an error. It will
-        # just return the first 5 results
-        raise ValueError(
-            'Only {address_max} addresses are allowed per '
-            'request'.format(
-                address_max=address_max,
+    for i, arg in enumerate(addresses):
+        if i >= ADDRESS_MAX:
+            # Raise here. The Verify API will not return an error. It will
+            # just return the first 5 results
+            raise ValueError(
+                'Only {ADDRESS_MAX} addresses are allowed per '
+                'request'.format(
+                    ADDRESS_MAX=ADDRESS_MAX,
+                    )
                 )
-            )
 
-    for i,arg in enumerate(args):
         address = arg['address']
         city = arg['city']
         state = arg.get('state', None)
@@ -179,8 +169,8 @@ def _create_xml(
 
     return root
 
-def verify(user_id, *args):
-    xml = _create_xml(user_id, *args)
+def verify(user_id: str, addresses: Iterable) -> "list[OrderedDict]":
+    xml = _create_xml(user_id, addresses)
     res = _get_response(xml)
     res = _parse_response(res)
 
