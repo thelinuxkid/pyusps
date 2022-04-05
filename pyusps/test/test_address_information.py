@@ -465,13 +465,13 @@ def test_verify_api_empty_error(fake_urlopen):
         }
     ]
     err = assert_raises(
-        TypeError,
+        RuntimeError,
         verify,
         'foo_id',
         address
         )
 
-    expected = TypeError('Could not find any address or error information')
+    expected = RuntimeError('Could not find any address or error information')
     assert_errors_equal(err, expected)
 
 @fudge.patch('pyusps.urlutil.urlopen')
@@ -496,12 +496,12 @@ def test_verify_api_order_error(fake_urlopen):
         }
     ]
     err = assert_raises(
-        IndexError,
+        RuntimeError,
         verify,
         'foo_id',
         addresses
         )
-    expected = IndexError(
+    expected = RuntimeError(
         'The addresses returned are not in the same order they were requested'
     )
     assert_errors_equal(err, expected)

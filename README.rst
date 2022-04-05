@@ -28,7 +28,8 @@ function.
 Requests
 --------
 
-It takes in the user ID given to you by the USPS and a list of addresses to verify.
+It takes in the user ID given to you by the USPS and an iterable of addresses to verify.
+You can only supply up to 5 addresses at a time due to the API's limits.
 Each address is a dict containing the following required keys:
 
      :address: The street address
@@ -49,7 +50,7 @@ The following keys are optional:
 Responses
 ---------
 
-The response will either be list of dicts. Each address
+The response will either be list of `dict`s or `USPSError`s. Each `dict`
 will always contain the following keys:
 
      :address: The street address
@@ -59,7 +60,7 @@ will always contain the following keys:
      :zip4: The last four numbers of the zip code
 
 
-Each address can optionally contain the following keys:
+Each `dict` can optionally contain the following keys:
 
     :firm_name: The company name, e.g., XYZ Corp.
     :address_extended: An apartment, suite number, etc
@@ -69,27 +70,29 @@ Each address can optionally contain the following keys:
 *firm_name, address_extended and urbanization will return the value
 requested if the API does not find a match.*
 
-For multiple addresses, the order in which the addresses
+If the USPS can't find an address, then in the response list, instead of a `dict` you
+will receive a `USPSError`. `USPSError` is a subclass of `RuntimeError`, and has the
+additional attributes of `code` and  `description` for the error.
+
+The order in which the addresses
 were specified in the request is preserved in the response.
 
 Errors
 ------
 
-A ValueError will be raised if there's a general error, e.g.,
-invalid user id, or if a single address request generates an error.
-Except for a general error, multiple addresses requests do not raise errors.
-Instead, if one of the addresses generates an error, the
-ValueError object is returned along with the rest of the results.
-
+- ValueError will be raised if you request more than 5 addresses.
+- RuntimeError will be raised when the API returns a response that we can't parse
+  or otherwise doesn't make sense (You shouldn't run into this).
+- A USPSError will be raised if the supplied user_id is invalid.
 
 Example
 -------
 
-Mutiple addresses error::
+Mutiple addresses, one of them isn't found so an error is returned::
 
-    from pyusps import address_information
+    >>> from pyusps import address_information
 
-    addrs = [
+    >>> addrs = [
         {
             "address": "6406 Ivy Lane",
             "city": "Greenbelt",
@@ -101,7 +104,8 @@ Mutiple addresses error::
             "state": "NJ",
         },
     ]
-    address_information.verify('foo_id', addrs)
+    >>> results = address_information.verify('foo_id', addrs)
+    >>> results
     [
         {
             'address': '6406 IVY LN',
@@ -115,6 +119,10 @@ Mutiple addresses error::
         },
         USPSError('-2147219400: Invalid City.  '),
     ]
+    >>> results[1].code
+    '-2147219400'
+    >>> res[1].description
+    'Invalid City.  '
 
 
 Reference

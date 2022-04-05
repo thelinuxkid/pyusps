@@ -70,7 +70,7 @@ def _process_multiple(addresses):
                 msg = ('The addresses returned are not in the same '
                        'order they were requested'
                        )
-                raise IndexError(msg)
+                raise RuntimeError(msg)
             result = _parse_address(address)
         results.append(result)
 
@@ -84,9 +84,7 @@ def _parse_response(res):
 
     results = res.findall('Address')
     if len(results) == 0:
-        raise TypeError(
-            'Could not find any address or error information'
-            )
+        raise RuntimeError('Could not find any address or error information')
     return _process_multiple(results)
 
 def _get_response(xml):
