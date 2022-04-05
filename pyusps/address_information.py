@@ -27,19 +27,18 @@ def _get_address_error(address):
 
 def _parse_address(address):
     result = OrderedDict()
+    # More user-friendly names for street
+    # attributes
+    m = {
+        "address2": "address",
+        "address1": "address_extended",
+        "firmname": "firm_name",
+    }
     for child in address.iterchildren():
         # elements are yielded in order
         name = child.tag.lower()
-        # More user-friendly names for street
-        # attributes
-        if name == 'address2':
-            name = 'address'
-        elif name == 'address1':
-            name = 'address_extended'
-        elif name == 'firmname':
-            name = 'firm_name'
+        name = m.get(name, name)
         result[name] = child.text
-
     return result
 
 def _process_multiple(addresses):
