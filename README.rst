@@ -22,13 +22,13 @@ or easy_install::
 Address Information API
 =======================
 
-This API is avaiable via the pyusps.address_information.verify
-function. It takes in the user ID given to you by the USPS
-and a variable length list of addresses to verify.
+This API is avaiable via the `pyusps.address_information.verify`
+function.
 
 Requests
 --------
 
+It takes in the user ID given to you by the USPS and a list of addresses to verify.
 Each address is a dict containing the following required keys:
 
      :address: The street address
@@ -49,8 +49,7 @@ The following keys are optional:
 Responses
 ---------
 
-The response will either be a dict, if a single address was requested,
-or a list of dicts, if multiple addresses were requested. Each address
+The response will either be list of dicts. Each address
 will always contain the following keys:
 
      :address: The street address
@@ -83,88 +82,40 @@ Instead, if one of the addresses generates an error, the
 ValueError object is returned along with the rest of the results.
 
 
-Examples
---------
-
-Single address request::
-
-       from pyusps import address_information
-
-       addr = dict([
-            ('address', '6406 Ivy Lane'),
-            ('city', 'Greenbelt'),
-            ('state', 'MD'),
-            ])
-       address_information.verify('foo_id', addr)
-       dict([
-           ('address', '6406 IVY LN'),
-           ('city', 'GREENBELT'),
-           ('state', 'MD'),
-           ('zip5', '20770'),
-           ('zip4', '1441'),
-           ])
-
-Mutiple addresses request::
-
-       from pyusps import address_information
-
-       addrs = [
-           dict([
-                   ('address', '6406 Ivy Lane'),
-                   ('city', 'Greenbelt'),
-                   ('state', 'MD'),
-                   ]),
-           dict([
-                   ('address', '8 Wildwood Drive'),
-                   ('city', 'Old Lyme'),
-                   ('state', 'CT'),
-                   ]),
-          ]
-       address_information.verify('foo_id', *addrs)
-       [
-        dict([
-                ('address', '6406 IVY LN'),
-                ('city', 'GREENBELT'),
-                ('state', 'MD'),
-                ('zip5', '20770'),
-                ('zip4', '1441'),
-                ]),
-        dict([
-                ('address', '8 WILDWOOD DR'),
-                ('city', 'OLD LYME'),
-                ('state', 'CT'),
-                ('zip5', '06371'),
-                ('zip4', '1844'),
-                ]),
-        ]
+Example
+-------
 
 Mutiple addresses error::
 
-       from pyusps import address_information
+    from pyusps import address_information
 
-       addrs = [
-           dict([
-                   ('address', '6406 Ivy Lane'),
-                   ('city', 'Greenbelt'),
-                   ('state', 'MD'),
-                   ]),
-           dict([
-                   ('address', '8 Wildwood Drive'),
-                   ('city', 'Old Lyme'),
-                   ('state', 'NJ'),
-                   ]),
-          ]
-       address_information.verify('foo_id', *addrs)
-       [
-        dict([
-                ('address', '6406 IVY LN'),
-                ('city', 'GREENBELT'),
-                ('state', 'MD'),
-                ('zip5', '20770'),
-                ('zip4', '1441'),
-                ]),
-        ValueError('-2147219400: Invalid City.  '),
-        ]
+    addrs = [
+        {
+            "address": "6406 Ivy Lane",
+            "city": "Greenbelt",
+            "state": "MD",
+        },
+        {
+            "address": "8 Wildwood Drive",
+            "city": "Old Lyme",
+            "state": "NJ",
+        },
+    ]
+    address_information.verify('foo_id', addrs)
+    [
+        {
+            'address': '6406 IVY LN',
+            'city': 'GREENBELT',
+            'returntext': 'Default address: The address you entered was found but more '
+                        'information is needed (such as an apartment, suite, or box '
+                        'number) to match to a specific address.',
+            'state': 'MD',
+            'zip4': '1435',
+            'zip5': '20770'
+        },
+        USPSError('-2147219400: Invalid City.  '),
+    ]
+
 
 Reference
 ---------

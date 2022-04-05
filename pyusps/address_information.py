@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from typing import Iterable
 
 from lxml import etree
@@ -43,7 +42,7 @@ def _get_address_error(address):
         return _get_error(error_node)
 
 def _parse_address(address):
-    result = OrderedDict()
+    result = {}
     # More user-friendly names for street
     # attributes
     m = {
@@ -91,10 +90,7 @@ def _parse_response(res):
     return _process_multiple(results)
 
 def _get_response(xml):
-    params = OrderedDict([
-            ('API', 'Verify'),
-            ('XML', etree.tostring(xml)),
-            ])
+    params = {'API': 'Verify', 'XML': etree.tostring(xml)}
     param_string = pyusps.urlutil.urlencode(params)
     url = f'https://production.shippingapis.com/ShippingAPI.dll?{param_string}'
     res = pyusps.urlutil.urlopen(url)
@@ -174,7 +170,7 @@ def _create_xml(
 
     return root
 
-def verify(user_id: str, addresses: Iterable) -> "list[OrderedDict]":
+def verify(user_id: str, addresses: Iterable) -> "list[dict]":
     xml = _create_xml(user_id, addresses)
     res = _get_response(xml)
     res = _parse_response(res)
