@@ -22,6 +22,8 @@ the motivation of many of these changes.
 ### Added
 
 - Supports supplying an iterable of addresses, no longer needs the __len__ method.
+- Each supplied input now only needs to have a `__getitem__()` method. Before, it
+  needed that but also a `get()` method.
 - If you supply an empty iterable as input, you get back an empty list, not an error.
 - The new `USPSError` includes the attributes `code: str` and `description: str`
   so you can get the original error without having to do string parsing.

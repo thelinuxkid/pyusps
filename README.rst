@@ -30,7 +30,8 @@ Requests
 
 It takes in the user ID given to you by the USPS and an iterable of addresses to verify.
 You can only supply up to 5 addresses at a time due to the API's limits.
-Each address is a dict containing the following required keys:
+Each address is a dict-like (e.g. supports `__getitem__()`) containing the following
+required keys:
 
      :address: The street address
      :city: The city
@@ -44,8 +45,6 @@ The following keys are optional:
     :firm_name: The company name, e.g., XYZ Corp. Although the API documentation says this field is required, tests show that it isn't.
     :address_extended: An apartment, suite number, etc
     :urbanization: For Puerto Rico addresses only
-
-
 
 Responses
 ---------

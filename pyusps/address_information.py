@@ -1,4 +1,5 @@
-from typing import Iterable
+from collections.abc import Mapping
+from typing import Any, Iterable, Union
 
 from lxml import etree
 
@@ -27,6 +28,8 @@ class USPSError(ValueError):
             self.description == o.description
         )
 
+Result = Union[dict, USPSError]
+
 def _get_error(node):
     if node.tag != 'Error':
         return None
@@ -41,7 +44,7 @@ def _get_address_error(address):
     else:
         return _get_error(error_node)
 
-def _parse_address(address):
+def _parse_address(address) -> dict:
     result = {}
     # More user-friendly names for street
     # attributes
@@ -57,7 +60,7 @@ def _parse_address(address):
         result[name] = child.text
     return result
 
-def _process_multiple(addresses):
+def _process_multiple(addresses) -> "list[Result]":
     results = []
     for i, address in enumerate(addresses):
         # Return error object if there are
@@ -76,7 +79,7 @@ def _process_multiple(addresses):
 
     return results
 
-def _parse_response(res):
+def _parse_response(res) -> "list[Result]":
     # General error, e.g., authorization
     error = _get_error(res.getroot())
     if error is not None:
@@ -95,7 +98,7 @@ def _get_response(xml):
     res = etree.parse(res)
     return res
 
-def _convert_input(input: Iterable[dict]) -> list[dict]:
+def _convert_input(input: Iterable[Mapping]) -> list[Mapping]:
     result = []
     for i, address in enumerate(input):
         if i >= ADDRESS_MAX:
@@ -105,20 +108,27 @@ def _convert_input(input: Iterable[dict]) -> list[dict]:
         result.append(address)
     return result
 
+def _get(mapping: Mapping, key: str) -> Any:
+    """Wrapper so that mapping only has to implement __getitem__, not get()."""
+    try:
+        return mapping[key]
+    except KeyError:
+        return None
+
 def _create_xml(
-    user_id,
-    addresses: list[dict],
+    user_id: str,
+    addresses: "list[Mapping]",
     ):
     root = etree.Element('AddressValidateRequest', USERID=user_id)
 
     for i, arg in enumerate(addresses):
         address = arg['address']
         city = arg['city']
-        state = arg.get('state', None)
-        zip_code = arg.get('zip_code', None)
-        address_extended = arg.get('address_extended', None)
-        firm_name = arg.get('firm_name', None)
-        urbanization = arg.get('urbanization', None)
+        state = _get(arg, 'state')
+        zip_code = _get(arg, 'zip_code')
+        address_extended = _get(arg, 'address_extended')
+        firm_name = _get(arg, 'firm_name')
+        urbanization = _get(arg, 'urbanization')
 
         address_el = etree.Element('Address', ID=str(i))
         root.append(address_el)
@@ -173,7 +183,7 @@ def _create_xml(
 
     return root
 
-def verify(user_id: str, addresses: "Iterable[dict]") -> "list[dict]":
+def verify(user_id: str, addresses: "Iterable[Mapping]") -> "list[Union[dict, USPSError]]":
     addresses = _convert_input(addresses)
     if len(addresses) == 0:
         return []
