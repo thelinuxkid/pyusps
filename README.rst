@@ -22,14 +22,16 @@ or easy_install::
 Address Information API
 =======================
 
-This API is avaiable via the pyusps.address_information.verify
-function. It takes in the user ID given to you by the USPS
-and a variable length list of addresses to verify.
+This API is avaiable via the `pyusps.address_information.verify`
+function.
 
 Requests
 --------
 
-Each address is a dict containing the following required keys:
+It takes in the user ID given to you by the USPS and an iterable of addresses to verify.
+You can only supply up to 5 addresses at a time due to the API's limits.
+Each address is a dict-like (e.g. supports `__getitem__()`) containing the following
+required keys:
 
      :address: The street address
      :city: The city
@@ -44,13 +46,10 @@ The following keys are optional:
     :address_extended: An apartment, suite number, etc
     :urbanization: For Puerto Rico addresses only
 
-
-
 Responses
 ---------
 
-The response will either be a dict, if a single address was requested,
-or a list of dicts, if multiple addresses were requested. Each address
+The response will either be list of `dict`s or `USPSError`s. Each `dict`
 will always contain the following keys:
 
      :address: The street address
@@ -60,7 +59,7 @@ will always contain the following keys:
      :zip4: The last four numbers of the zip code
 
 
-Each address can optionally contain the following keys:
+Each `dict` can optionally contain the following keys:
 
     :firm_name: The company name, e.g., XYZ Corp.
     :address_extended: An apartment, suite number, etc
@@ -70,101 +69,60 @@ Each address can optionally contain the following keys:
 *firm_name, address_extended and urbanization will return the value
 requested if the API does not find a match.*
 
-For multiple addresses, the order in which the addresses
+If the USPS can't find an address, then in the response list, instead of a `dict` you
+will receive a `USPSError`. `USPSError` is a subclass of `RuntimeError`, and has the
+additional attributes of `code` and  `description` for the error.
+
+The order in which the addresses
 were specified in the request is preserved in the response.
 
 Errors
 ------
 
-A ValueError will be raised if there's a general error, e.g.,
-invalid user id, or if a single address request generates an error.
-Except for a general error, multiple addresses requests do not raise errors.
-Instead, if one of the addresses generates an error, the
-ValueError object is returned along with the rest of the results.
+- ValueError will be raised if you request more than 5 addresses.
+- RuntimeError will be raised when the API returns a response that we can't parse
+  or otherwise doesn't make sense (You shouldn't run into this).
+- A USPSError will be raised if the supplied user_id is invalid.
 
+Example
+-------
 
-Examples
---------
+Mutiple addresses, one of them isn't found so an error is returned::
 
-Single address request::
+    >>> from pyusps import address_information
 
-       from pyusps import address_information
+    >>> addrs = [
+        {
+            "address": "6406 Ivy Lane",
+            "city": "Greenbelt",
+            "state": "MD",
+        },
+        {
+            "address": "8 Wildwood Drive",
+            "city": "Old Lyme",
+            "state": "NJ",
+        },
+    ]
+    >>> results = address_information.verify('foo_id', addrs)
+    >>> results
+    [
+        {
+            'address': '6406 IVY LN',
+            'city': 'GREENBELT',
+            'returntext': 'Default address: The address you entered was found but more '
+                        'information is needed (such as an apartment, suite, or box '
+                        'number) to match to a specific address.',
+            'state': 'MD',
+            'zip4': '1435',
+            'zip5': '20770'
+        },
+        USPSError('-2147219400: Invalid City.'),
+    ]
+    >>> results[1].code
+    '-2147219400'
+    >>> res[1].description
+    'Invalid City.'
 
-       addr = dict([
-            ('address', '6406 Ivy Lane'),
-            ('city', 'Greenbelt'),
-            ('state', 'MD'),
-            ])
-       address_information.verify('foo_id', addr)
-       dict([
-           ('address', '6406 IVY LN'),
-           ('city', 'GREENBELT'),
-           ('state', 'MD'),
-           ('zip5', '20770'),
-           ('zip4', '1441'),
-           ])
-
-Mutiple addresses request::
-
-       from pyusps import address_information
-
-       addrs = [
-           dict([
-                   ('address', '6406 Ivy Lane'),
-                   ('city', 'Greenbelt'),
-                   ('state', 'MD'),
-                   ]),
-           dict([
-                   ('address', '8 Wildwood Drive'),
-                   ('city', 'Old Lyme'),
-                   ('state', 'CT'),
-                   ]),
-          ]
-       address_information.verify('foo_id', *addrs)
-       [
-        dict([
-                ('address', '6406 IVY LN'),
-                ('city', 'GREENBELT'),
-                ('state', 'MD'),
-                ('zip5', '20770'),
-                ('zip4', '1441'),
-                ]),
-        dict([
-                ('address', '8 WILDWOOD DR'),
-                ('city', 'OLD LYME'),
-                ('state', 'CT'),
-                ('zip5', '06371'),
-                ('zip4', '1844'),
-                ]),
-        ]
-
-Mutiple addresses error::
-
-       from pyusps import address_information
-
-       addrs = [
-           dict([
-                   ('address', '6406 Ivy Lane'),
-                   ('city', 'Greenbelt'),
-                   ('state', 'MD'),
-                   ]),
-           dict([
-                   ('address', '8 Wildwood Drive'),
-                   ('city', 'Old Lyme'),
-                   ('state', 'NJ'),
-                   ]),
-          ]
-       address_information.verify('foo_id', *addrs)
-       [
-        dict([
-                ('address', '6406 IVY LN'),
-                ('city', 'GREENBELT'),
-                ('state', 'MD'),
-                ('zip5', '20770'),
-                ('zip4', '1441'),
-                ]),
-        ValueError('-2147219400: Invalid City.  '),
-        ]
 
 Reference
 ---------

@@ -1,0 +1,64 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "0 0 * * 0" # weekly
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # Pin to an exact 3.9 version due to https://github.com/fudge-py/fudge/issues/13
+        python-version: [3.6, 3.7, 3.8, "3.9.6"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies and this library
+        run: pip install -e .[test]
+      - name: Run tests
+        run: nosetests
+  lint:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9.6" # Latest python that still works with fudge
+      - name: Install dependencies and this library
+        run: pip install -e .[test]
+      - name: Run MyPy
+        run: mypy pyusps
+  build_dist:
+    name: Build wheels
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Build sdist and wheel
+        run: |
+          pip install build
+          python -m build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist/
+      - name: Publish wheels to PyPI
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          pip install twine
+          twine upload dist/*
+        continue-on-error: true

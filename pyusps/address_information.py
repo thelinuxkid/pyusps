@@ -1,135 +1,133 @@
-from collections import OrderedDict
+from collections.abc import Mapping
+from typing import Any, Iterable, Union
 
 from lxml import etree
 
-import pyusps.urlutil
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
+ADDRESS_MAX = 5
 
-api_url = 'https://production.shippingapis.com/ShippingAPI.dll'
-address_max = 5
+class USPSError(ValueError):
+    """
+    An error from the USPS API, such as a bad `user_id` or when an address is not found.
 
-def _find_error(root):
-    if root.tag == 'Error':
-        num = root.find('Number')
-        desc = root.find('Description')
-        return (num, desc)
+    Inherits from ValueError. Also has attributes `code: str` and `description: str`.
+    """
+    code: str
+    description: str
 
-def _get_error(error):
-    (num, desc) = error
-    return ValueError(
-        '{num}: {desc}'.format(
-            num=num.text,
-            desc=desc.text,
-            )
+    def __init__(self, code: str, description: str) -> None:
+        self.code = code
+        self.description = description
+        super().__init__(f"{code}: {description}")
+
+    def __eq__(self, o: object) -> bool:
+        return (
+            isinstance(o, USPSError) and
+            self.code == o.code and
+            self.description == o.description
         )
 
-def _get_address_error(address):
-    error = address.find('Error')
-    if error is not None:
-        error = _find_error(error)
-        return _get_error(error)
+Result = Union[dict, USPSError]
 
-def _parse_address(address):
-    result = OrderedDict()
+def _get_error(node):
+    if node.tag != 'Error':
+        return None
+    code = node.find('Number').text.strip()
+    description = node.find('Description').text.strip()
+    return USPSError(code, description)
+
+def _get_address_error(address: etree._Element) -> Union[USPSError, None]:
+    error_node = address.find('Error')
+    if error_node is None:
+        return None
+    else:
+        return _get_error(error_node)
+
+def _parse_address(address: etree._Element) -> dict:
+    result = {}
+    # More user-friendly names for street
+    # attributes
+    m = {
+        "address2": "address",
+        "address1": "address_extended",
+        "firmname": "firm_name",
+    }
     for child in address.iterchildren():
         # elements are yielded in order
         name = child.tag.lower()
-        # More user-friendly names for street
-        # attributes
-        if name == 'address2':
-            name = 'address'
-        elif name == 'address1':
-            name = 'address_extended'
-        elif name == 'firmname':
-            name = 'firm_name'
+        name = m.get(name, name)
         result[name] = child.text
-
     return result
 
-def _process_one(address):
-    # Raise address error if there's only one item
-    error = _get_address_error(address)
-    if error is not None:
-        raise error
-
-    return _parse_address(address)
-
-def _process_multiple(addresses):
+def _process_multiple(addresses: "list[etree._Element]") -> "list[Result]":
     results = []
-    count = 0
-    for address in addresses:
+    for i, address in enumerate(addresses):
         # Return error object if there are
         # multiple items
+        result: Result
         error = _get_address_error(address)
         if error is not None:
             result = error
         else:
-            result = _parse_address(address)
-            if str(count) != address.get('ID'):
+            if str(i) != address.get('ID'):
                 msg = ('The addresses returned are not in the same '
                        'order they were requested'
                        )
-                raise IndexError(msg)
+                raise RuntimeError(msg)
+            result = _parse_address(address)
         results.append(result)
-        count += 1
 
     return results
 
-def _parse_response(res):
+def _parse_response(res: etree._ElementTree) -> "list[Result]":
     # General error, e.g., authorization
-    error = _find_error(res.getroot())
+    error = _get_error(res.getroot())
     if error is not None:
-        raise _get_error(error)
+        raise error
 
-    results = res.findall('Address')
-    length = len(results)
-    if length == 0:
-        raise TypeError(
-            'Could not find any address or error information'
-            )
-    if length == 1:
-        return _process_one(results.pop())
-    return _process_multiple(results)
+    elements = res.findall('Address')
+    if len(elements) == 0:
+        raise RuntimeError('Could not find any address or error information')
+    return _process_multiple(elements)
 
-def _get_response(xml):
-    params = OrderedDict([
-            ('API', 'Verify'),
-            ('XML', etree.tostring(xml)),
-            ])
-    url = '{api_url}?{params}'.format(
-        api_url=api_url,
-        params=pyusps.urlutil.urlencode(params),
-        )
+def _get_response(xml: etree._Element) -> etree._ElementTree:
+    params = {'API': 'Verify', 'XML': etree.tostring(xml)}
+    param_string = urlencode(params)
+    url = f'https://production.shippingapis.com/ShippingAPI.dll?{param_string}'
+    res = urlopen(url)
+    tree = etree.parse(res)
+    return tree
 
-    res = pyusps.urlutil.urlopen(url)
-    res = etree.parse(res)
+def _convert_input(input: "Iterable[Mapping]") -> "list[Mapping]":
+    result = []
+    for i, address in enumerate(input):
+        if i >= ADDRESS_MAX:
+            # Raise here. The Verify API will not return an error. It will
+            # just return the first 5 results
+            raise ValueError(f'Only {ADDRESS_MAX} addresses are allowed per request')
+        result.append(address)
+    return result
 
-    return res
+def _get(mapping: Mapping, key: str) -> Any:
+    """Wrapper so that mapping only has to implement __getitem__, not get()."""
+    try:
+        return mapping[key]
+    except KeyError:
+        return None
 
-def _create_xml(
-    user_id,
-    *args
-    ):
+def _create_xml(user_id: str, addresses: "list[Mapping]") -> etree._Element:
     root = etree.Element('AddressValidateRequest', USERID=user_id)
 
-    if len(args) > address_max:
-        # Raise here. The Verify API will not return an error. It will
-        # just return the first 5 results
-        raise ValueError(
-            'Only {address_max} addresses are allowed per '
-            'request'.format(
-                address_max=address_max,
-                )
-            )
-
-    for i,arg in enumerate(args):
+    for i, arg in enumerate(addresses):
         address = arg['address']
         city = arg['city']
-        state = arg.get('state', None)
-        zip_code = arg.get('zip_code', None)
-        address_extended = arg.get('address_extended', None)
-        firm_name = arg.get('firm_name', None)
-        urbanization = arg.get('urbanization', None)
+        state = _get(arg, 'state')
+        zip_code = _get(arg, 'zip_code')
+        address_extended = _get(arg, 'address_extended')
+        firm_name = _get(arg, 'firm_name')
+        urbanization = _get(arg, 'urbanization')
 
         address_el = etree.Element('Address', ID=str(i))
         root.append(address_el)
@@ -184,9 +182,11 @@ def _create_xml(
 
     return root
 
-def verify(user_id, *args):
-    xml = _create_xml(user_id, *args)
-    res = _get_response(xml)
-    res = _parse_response(res)
-
+def verify(user_id: str, addresses: "Iterable[Mapping]") -> "list[Union[dict, USPSError]]":
+    addresses = _convert_input(addresses)
+    if len(addresses) == 0:
+        return []
+    xml_request = _create_xml(user_id, addresses)
+    xml_response = _get_response(xml_request)
+    res = _parse_response(xml_response)
     return res
